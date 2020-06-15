@@ -1,16 +1,8 @@
-try:
-    from PIL import Image
-except ImportError:
-    import Image
 import pytesseract
-
+from pytesseract import Output
 import cv2 as cv
 
 from matplotlib import pyplot as plt
-
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
-
-image = cv.imread("../Images/source.png")
 
 def detect(frame, x, y, cell_w, cell_h):
     cropped_frame = frame[ y:y+cell_h , x:x+cell_w]
@@ -19,26 +11,51 @@ def detect(frame, x, y, cell_w, cell_h):
     text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')
     return text
 
-im_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
-gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-(thresh, blackAndWhiteImage) = cv.threshold(gray, 100, 255, cv.THRESH_BINARY)
+def get_grayscale(image):
+    return cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
-#cv.imwrite("../Images/bw.png", blackAndWhiteImage);
+def get_binary(image):
+    (thresh, blackAndWhiteImage) = cv.threshold(gray, 100, 255, cv.THRESH_BINARY)
+    return blackAndWhiteImage
 
-plt.imshow(blackAndWhiteImage, cmap='gray')
+def get_rgb(image):
+    return cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
-x = 650
-y = 445
-cell_height = 25
-cell_width = 45
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
-offset_x = [650, 720, 780, 850, 915, 985, 1040, 1110, 1180, 1248, 1320, 1400, 1480]
+image = cv.imread("../Images/source2.png")
 
-for offset in offset_x:
-    text = detect(blackAndWhiteImage, offset, y, cell_width, cell_height)
-    if(text=="G"):
-        text = str(9)
-    print(text)
+nb_image = 1
 
-#cv.waitKey(0)
-#cv.destroyAllWindows()
+images = []
+for i in range (nb_image):
+    title = "../Images/source" + str(i) + ".png"
+    images.append(cv.imread(title))
+    
+offset_x = 25
+offset_y = 5
+
+keywords = ["Kabupaten/Kota", "Provinsi"]
+
+box_keywords = {}
+
+n_boxes = len(d['level'])
+for i in range (nb_image):
+    gray = get_grayscale(images[i])
+    d = pytesseract.image_to_data(gray, output_type=Output.DICT, lang='eng')
+    for j in range(n_boxes):
+        text = d['text'][j]
+        if(text in keywords):
+            (x, y, w, h) = (d['left'][j], d['top'][j], d['width'][j], d['height'][j])
+            x1 = x-offset_x
+            x2 = x + w + offset_x
+            y1 = y-offset_y
+            y2 = y+h+offset_y
+            box_keywords[text] = (x1, x2, y1, y2)
+            cv.rectangle(gray, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv.imshow('img'+str(i), gray)
+            print(text + " || Loc: [" + str(x1) + ", " + str(x2) + "][" + str(y1) + ", " + str(y2) + "]")
+            cv.waitKey(1)
+            
+cv.waitKey(0)
+cv.destroyAllWindows()
