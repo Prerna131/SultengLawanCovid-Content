@@ -21,6 +21,11 @@ def get_binary(image):
 def get_rgb(image):
     return cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
+def get_regions_ROI(image, x, y, w, h):
+    cropped_image = image[ y:y+h , x:x+w ]
+    cv.imshow("cropped_image", cropped_image)
+    return cropped_image
+
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
 image = cv.imread("../Images/source2.png")
@@ -56,6 +61,18 @@ for i in range (nb_image):
             cv.imshow('img'+str(i), gray)
             print(text + " || Loc: [" + str(x1) + ", " + str(x2) + "][" + str(y1) + ", " + str(y2) + "]")
             cv.waitKey(1)
+            
+print(box_keywords)
+
+w = box_keywords['Kabupaten/Kota'][1] - box_keywords['Kabupaten/Kota'][0]
+h = box_keywords['Provinsi'][3] - box_keywords['Kabupaten/Kota'][2]
+x = box_keywords['Kabupaten/Kota'][0]
+y = box_keywords['Kabupaten/Kota'][2]
+
+#select the latest image
+croppedImage = get_regions_ROI(images[i], x, y, w, h)
+
+d = pytesseract.image_to_data(croppedImage, output_type=Output.DICT, lang='eng')
             
 cv.waitKey(0)
 cv.destroyAllWindows()
