@@ -33,9 +33,8 @@ image = cv.imread("../Images/source2.png")
 nb_image = 1
 
 images = []
-for i in range (nb_image):
-    title = "../Images/source" + str(i) + ".png"
-    images.append(cv.imread(title))
+title = "../Images/source" + str(1) + ".png"
+images.append(cv.imread(title))
     
 offset_x = 25
 offset_y = 5
@@ -57,10 +56,10 @@ for i in range (nb_image):
             y1 = y-offset_y
             y2 = y+h+offset_y
             box_keywords[text] = (x1, x2, y1, y2)
-            cv.rectangle(gray, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            cv.imshow('img'+str(i), gray)
-            print(text + " || Loc: [" + str(x1) + ", " + str(x2) + "][" + str(y1) + ", " + str(y2) + "]")
-            cv.waitKey(1)
+            #cv.rectangle(gray, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            #cv.imshow('img'+str(i), gray)
+            #print(text + " || Loc: [" + str(x1) + ", " + str(x2) + "][" + str(y1) + ", " + str(y2) + "]")
+            #cv.waitKey(1)
             
 print(box_keywords)
 
@@ -71,8 +70,47 @@ y = box_keywords['Kabupaten/Kota'][2]
 
 #select the latest image
 croppedImage = get_regions_ROI(images[i], x, y, w, h)
-
 d = pytesseract.image_to_data(croppedImage, output_type=Output.DICT, lang='eng')
+#print(d)
+n_boxes = len(d['level'])
+region_name = ""
+kabupaten = {'data':[]}
+index = 0
+
+for j in range(n_boxes):
+    text = d['text'][j]
+    word_num = d['word_num'][j]
+    if(word_num>0 and len(text)>2):
+        (x, y, w, h) = (d['left'][j], d['top'][j], d['width'][j], d['height'][j])
+        x1 = x
+        x2 = x + w
+        y1 = y
+        y2 = y+h
+            
+        
+        if ( d['word_num'][j] == 1):
+            region_dict = {}                    
+            region_name = text
+            region_dict["no"] = index
+            region_dict["name"] = region_name
+            region_dict["box"] = [x1, y1, x2, y2]
+            index += 1
+            kabupaten['data'].append(region_dict)
+        else:
+            region_name += " " + text
+            region_dict["name"] = region_name
+            region_dict["box"][2] = x2
+            region_dict["box"][3] = y2
+                
+        #if (region_name_completed):
+
+for region in kabupaten['data']:
+    cv.rectangle(croppedImage, (region["box"][0], region["box"][1]), (region["box"][2], region["box"][3]), (0, 255, 0), 2)           
+
+cv.imshow('img'+str(i), croppedImage)
+
+print(kabupaten)        
+
             
 cv.waitKey(0)
 cv.destroyAllWindows()
