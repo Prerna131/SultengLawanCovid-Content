@@ -1,5 +1,4 @@
 import pytesseract
-from pytesseract import Output
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
 import cv2 as cv
@@ -28,7 +27,8 @@ def detect(frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=
 
     text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
     cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
-    
+    cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
+                       2, (0, 0, 0), 5, cv.LINE_AA)     
     if (display): 
         cv.imshow("detect", cropped_frame)
         #cv.imshow("ROI", cFrame)
@@ -36,7 +36,7 @@ def detect(frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=
         cv.destroyAllWindows()
     
     if (write_to_file):
-        cv.imwrite("../Images/"+ str(index) + ". " + text+".png", cFrame);
+        cv.imwrite("../Images/"+ str(index) + ".png", cFrame);
         
     return text
 
@@ -49,6 +49,8 @@ def detect_number(frame, x, y, cell_w, cell_h, index = 0, display=False, write_t
 
     text = pytesseract.image_to_string(cropped_frame, lang = 'eng', config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 2')
     cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
+    cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
+                       2, (0, 0, 0), 5, cv.LINE_AA) 
     
     if (display): 
         cv.imshow("detect", cropped_frame)
@@ -57,7 +59,7 @@ def detect_number(frame, x, y, cell_w, cell_h, index = 0, display=False, write_t
         cv.destroyAllWindows()
     
     if (write_to_file):
-        cv.imwrite("../Images/"+ str(index) + ". " + text+".png", cFrame);
+        cv.imwrite("../Images/"+ str(index) + ".png", cFrame);
         
     return text
 
@@ -81,8 +83,11 @@ def main():
     for keyword in keywords:
         dict_kabupaten[keyword] = []
     
+    counter = 0
+    
     for i in range(1,14):
         for j, keyword in enumerate(keywords):
+            counter += 1
             x1 = vertical[j][2] + offset
             y1 = horizontal[i][3] + offset
             x2 = vertical[j+1][2] - offset
@@ -92,10 +97,10 @@ def main():
             h = y2 - y1
             
             if (keyword=='kabupaten'):
-                text = detect(src, x1, y1, w, h, index=i+1)
+                text = detect(src, x1, y1, w, h, counter, write_to_file=True)
                 print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
             else:
-                text = detect_number(src, x1, y1, w, h, index=i+1)
+                text = detect_number(src, x1, y1, w, h, counter, write_to_file=True)
                 print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
                 
             dict_kabupaten[keyword].append(text)
