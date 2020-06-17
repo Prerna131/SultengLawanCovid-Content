@@ -40,7 +40,26 @@ def detect(frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=
         
     return text
 
+def detect_number(frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
+    gray = get_grayscale(frame)
+    bw = get_binary(gray)
+    cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
+    
+    cFrame = np.copy(frame)
 
+    text = pytesseract.image_to_string(cropped_frame, lang = 'eng', config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 2')
+    cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
+    
+    if (display): 
+        cv.imshow("detect", cropped_frame)
+        #cv.imshow("ROI", cFrame)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+    
+    if (write_to_file):
+        cv.imwrite("../Images/"+ str(index) + ". " + text+".png", cFrame);
+        
+    return text
 
 def main():
     filename = '../Images/source1.png'
@@ -72,7 +91,12 @@ def main():
             w = x2 - x1
             h = y2 - y1
             
-            text = detect(src, x1, y1, w, h, index=i+1)
+            if (keyword=='kabupaten'):
+                text = detect(src, x1, y1, w, h, index=i+1)
+                print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
+            else:
+                text = detect_number(src, x1, y1, w, h, index=i+1)
+                print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
                 
             dict_kabupaten[keyword].append(text)
             
