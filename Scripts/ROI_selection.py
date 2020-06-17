@@ -33,13 +33,23 @@ def is_vertical(line):
 
 def is_horizontal(line):
     return line[1]==line[3]
-
-def func1(x):
-    return x[0]
     
-def func2(x):
-    return x[1]
+def overlapping_filter(lines, sorting_index):
+    filtered_lines = []
     
+    lines = sorted(lines, key=lambda lines: lines[sorting_index])
+    
+    for i in range(len(lines)):
+            l_curr = lines[i]
+            if(i>0):
+                l_prev = lines[i-1]
+                if ( (l_curr[sorting_index] - l_prev[sorting_index]) > 5):
+                    filtered_lines.append(l_curr)
+            else:
+                filtered_lines.append(l_curr)
+                
+    return filtered_lines
+                
 def main(argv):
     
     default_file = '../Images/source0.png'
@@ -74,37 +84,19 @@ def main(argv):
                 
             elif (is_horizontal(l)):
                 horizontal_lines.append(l)
-    
-    
-        vertical_lines = sorted(vertical_lines, key=func1)
-        horizontal_lines = sorted(horizontal_lines, key=func2)
-    
-        for i in range(len(vertical_lines)):
-            l_curr = vertical_lines[i]
-            if(i>0):
-                l_prev = vertical_lines[i-1]
-                if ( (l_curr[0] - l_prev[0]) > 5):
-                    cv.line(cdstP, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,0,255), 3, cv.LINE_AA)
-                    cv.line(src, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,0,255), 3, cv.LINE_AA)
-                    
-            else:
-                cv.line(cdstP, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,0,255), 3, cv.LINE_AA)
-                cv.line(src, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,0,255), 3, cv.LINE_AA)
-                
-        for i in range(len(horizontal_lines)):
-            l_curr = horizontal_lines[i]
-            if(i>0):
-                l_prev = horizontal_lines[i-1]
-                if ( (l_curr[3] - l_prev[3]) > 5):
-                    cv.line(cdstP, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,255,0), 3, cv.LINE_AA)
-                    cv.line(src, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,255,0), 3, cv.LINE_AA)
-                    #cv.putText(src, str(l_curr[3]), (l_curr[0], l_curr[1]), font,  
-                    #       fontScale, (0, 0, 0), thickness, cv.LINE_AA) 
-            else:
-                cv.line(cdstP, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,255,0), 3, cv.LINE_AA)
-                cv.line(src, (l_curr[0], l_curr[1]), (l_curr[2], l_curr[3]), (0,255,0), 3, cv.LINE_AA)
-                #cv.putText(src, str(l_curr[3]), (l_curr[0], l_curr[1]), font,  
-                #       fontScale, (0, 0, 0), thickness, cv.LINE_AA) 
+        
+        horizontal_lines = overlapping_filter(horizontal_lines, 1)
+        vertical_lines = overlapping_filter(vertical_lines, 0)
+        
+        
+        for line in horizontal_lines:
+            cv.line(cdstP, (line[0], line[1]), (line[2], line[3]), (0,255,0), 3, cv.LINE_AA)
+            cv.line(src, (line[0], line[1]), (line[2], line[3]), (0,255,0), 3, cv.LINE_AA)
+            
+        for line in vertical_lines:
+            cv.line(cdstP, (line[0], line[1]), (line[2], line[3]), (0,0,255), 3, cv.LINE_AA)
+            cv.line(src, (line[0], line[1]), (line[2], line[3]), (0,0,255), 3, cv.LINE_AA)
+            
             
     cv.imshow("Source", src)
     cv.imshow("Canny", cdstP)
