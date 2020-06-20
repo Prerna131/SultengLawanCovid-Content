@@ -15,7 +15,6 @@ def get_binary(image):
     return blackAndWhiteImage
 
 def get_cropped_image(image, x, y, w, h):
-    print(image)
     cropped_image = image[ y:y+h , x:x+w ]
     return cropped_image
 
@@ -118,8 +117,6 @@ def main():
                 print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
                 
             dict_kabupaten[keyword].append(text)
-            
-    #text = detect(src, x1, y1, w, h, counter, display=True)
     
     print(dict_kabupaten)
     return 0
