@@ -15,24 +15,22 @@ def get_binary(image):
     return blackAndWhiteImage
 
 def get_cropped_image(image, x, y, w, h):
+    print(image)
     cropped_image = image[ y:y+h , x:x+w ]
     return cropped_image
 
 def invert_area(image, x, y, w, h):
     ones = np.copy(image)
-    ones = 255
+    ones = 1
     
-    image[ y:y+h , x:x+w ] = ones - image[ y:y+h , x:x+w ] 
-    cv.imshow("detect", image)
-    #cv.imshow("ROI", cFrame)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    image[ y:y+h , x:x+w ] = ones*255 - image[ y:y+h , x:x+w ] 
     
+    return image
     
-def detect(bw_frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
-    cropped_frame = get_cropped_image(bw_frame, x, y, cell_w, cell_h)
+def detect(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
+    cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
     
-    cFrame = np.copy(bw_frame)
+    cFrame = np.copy(bw)
 
     text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
     cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
@@ -49,12 +47,10 @@ def detect(bw_frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_fi
         
     return text
 
-def detect_number(frame, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
-    gray = get_grayscale(frame)
-    bw = get_binary(gray)
+def detect_number(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
     cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
     
-    cFrame = np.copy(frame)
+    cFrame = np.copy(bw)
 
     text = pytesseract.image_to_string(cropped_frame, lang = 'eng', config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
     cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
@@ -98,10 +94,13 @@ def main():
             'positif', 'sembuh', 'meninggal']
     
     dict_kabupaten = {}
-    
+    for keyword in keywords:
+        dict_kabupaten[keyword] = []
+        
     counter = 0
     for i in range(1,14):
         for j, keyword in enumerate(keywords):
+        #for j in range(17, 19):
             counter += 1
             x1 = vertical[j][2] + offset
             y1 = horizontal[i][3] + offset
@@ -111,17 +110,14 @@ def main():
             w = x2 - x1
             h = y2 - y1
             
-            if (keyword=='kabupaten'):
-                text = detect(src, x1, y1, w, h, counter, write_to_file=False)
+            if (keywords[i]=='kabupaten'):
+                text = detect(bw, x1, y1, w, h, counter)
                 print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
             else:
-                text = detect_number(src, x1, y1, w, h, counter, write_to_file=False)
+                text = detect_number(bw, x1, y1, w, h, counter)
                 print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
                 
             dict_kabupaten[keyword].append(text)
-            
-    for keyword in keywords:
-        dict_kabupaten[keyword] = []
             
     #text = detect(src, x1, y1, w, h, counter, display=True)
     
