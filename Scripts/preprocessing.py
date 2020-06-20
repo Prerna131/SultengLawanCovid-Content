@@ -99,10 +99,29 @@ def main():
     
     dict_kabupaten = {}
     
+    counter = 0
+    for i in range(1,14):
+        for j, keyword in enumerate(keywords):
+            counter += 1
+            x1 = vertical[j][2] + offset
+            y1 = horizontal[i][3] + offset
+            x2 = vertical[j+1][2] - offset
+            y2 = horizontal[i+1][3] -offset
+            
+            w = x2 - x1
+            h = y2 - y1
+            
+            if (keyword=='kabupaten'):
+                text = detect(src, x1, y1, w, h, counter, write_to_file=False)
+                print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
+            else:
+                text = detect_number(src, x1, y1, w, h, counter, write_to_file=False)
+                print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
+                
+            dict_kabupaten[keyword].append(text)
+            
     for keyword in keywords:
         dict_kabupaten[keyword] = []
-    
-    counter = 0
             
     #text = detect(src, x1, y1, w, h, counter, display=True)
     
