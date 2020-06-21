@@ -29,41 +29,23 @@ def invert_area(image, x, y, w, h, display=False):
         cv.destroyAllWindows()
     return image
     
-def detect(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
+def detect(bw, x, y, cell_w, cell_h, index = 0, is_number = False,
+           display=False, write_to_file=False):
     cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
     
     cFrame = np.copy(bw)
 
-    text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
+    if (is_number):
+        text = pytesseract.image_to_string(cropped_frame, lang = 'eng',
+                                           config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
+    else:
+        text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
     
     if (display or write_to_file):
         cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
         cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
                        2, (0, 0, 0), 5, cv.LINE_AA)
         
-    if (display): 
-        cv.imshow("detect", cropped_frame)
-        #cv.imshow("ROI", cFrame)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
-    
-    if (write_to_file):
-        cv.imwrite("../Images/"+ str(index) + ".png", cFrame);
-        
-    return text
-
-def detect_number(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
-    cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
-    
-    cFrame = np.copy(bw)
-    
-    text = pytesseract.image_to_string(cropped_frame, lang = 'eng', config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
-    
-    if (display or write_to_file):
-        cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
-        cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
-                       2, (0, 0, 0), 5, cv.LINE_AA) 
-    
     if (display): 
         cv.imshow("detect", cropped_frame)
         #cv.imshow("ROI", cFrame)
