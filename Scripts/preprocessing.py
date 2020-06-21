@@ -78,7 +78,6 @@ def main():
     bw = invert_area(bw, x, y, w, h, display=True)
     
     ## set keywords
-    
     keywords = ['no', 'kabupaten', 'kb_otg', 'kl_otg', 'sm_otg', 'ks_otg', 'not_cvd_otg',
             'kb_odp', 'kl_odp', 'sm_odp', 'ks_odp', 'not_cvd_odp',
             'kb_pdp', 'kl_pdp', 'sm_pdp', 'ks_pdp', 'not_cvd_pdp',
@@ -108,11 +107,11 @@ def main():
             x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
                          right_line_index, top_line_index, bottom_line_index)
             
-            if (keywords[i]=='kabupaten'):
-                text = detect(bw, x, y, w, h, counter)
+            if (keywords[j]=='kabupaten'):
+                text = detect(bw, x, y, w, h, index=counter)
                 print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
             else:
-                text = detect_number(bw, x, y, w, h, counter)
+                text = detect(bw, x, y, w, h, index=counter, is_number=True)
                 print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
                 
             ## add to dictionary
