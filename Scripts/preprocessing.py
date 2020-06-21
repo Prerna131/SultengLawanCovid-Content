@@ -18,12 +18,15 @@ def get_cropped_image(image, x, y, w, h):
     cropped_image = image[ y:y+h , x:x+w ]
     return cropped_image
 
-def invert_area(image, x, y, w, h):
+def invert_area(image, x, y, w, h, display=False):
     ones = np.copy(image)
     ones = 1
     
     image[ y:y+h , x:x+w ] = ones*255 - image[ y:y+h , x:x+w ] 
-    
+    if (display): 
+        cv.imshow("inverted", image)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
     return image
     
 def detect(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=False):
@@ -73,6 +76,7 @@ def main():
     src = cv.imread(cv.samples.findFile(filename))
     horizontal, vertical = detect_lines(src)
     
+    ## invert area
     offset = 4
     
     x1 = vertical[17][2] + offset
@@ -85,7 +89,10 @@ def main():
     
     gray = get_grayscale(src)
     bw = get_binary(gray)
-    bw = invert_area(bw, x1, y1, w, h)
+    cv.imshow("bw", bw)
+    bw = invert_area(bw, x1, y1, w, h, display=True)
+    
+    ## set keywords
     
     keywords = ['no', 'kabupaten', 'kb_otg', 'kl_otg', 'sm_otg', 'ks_otg', 'not_cvd_otg',
             'kb_odp', 'kl_odp', 'sm_odp', 'ks_odp', 'not_cvd_odp',
@@ -96,18 +103,25 @@ def main():
     for keyword in keywords:
         dict_kabupaten[keyword] = []
         
+    ## set counter for image indexing
     counter = 0
-    for i in range(1,14):
+    
+    ## set line index
+    first_line_index = 1
+    last_line_index = 14
+    
+    ## read text
+    for i in range(first_line_index, last_line_index):
         for j, keyword in enumerate(keywords):
         #for j in range(17, 19):
             counter += 1
-            x1 = vertical[j][2] + offset
-            y1 = horizontal[i][3] + offset
-            x2 = vertical[j+1][2] - offset
-            y2 = horizontal[i+1][3] -offset
+            x1 = vertical[j][2] + offset ## get the top-left x position
+            y1 = horizontal[i][3] + offset ## get the top-left y position
+            x2 = vertical[j+1][2] - offset ## get the bottom-right x position
+            y2 = horizontal[i+1][3] -offset ## get the bottom-right y position
             
-            w = x2 - x1
-            h = y2 - y1
+            w = x2 - x1 ## get the width
+            h = y2 - y1 ## get the height
             
             if (keywords[i]=='kabupaten'):
                 text = detect(bw, x1, y1, w, h, counter)
