@@ -3,7 +3,7 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\t
 
 import cv2 as cv
 
-from ROI_selection import detect_lines
+from ROI_selection import detect_lines, get_ROI
 
 import numpy as np
 
@@ -53,7 +53,7 @@ def detect_number(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_f
     cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
     
     cFrame = np.copy(bw)
-
+    
     text = pytesseract.image_to_string(cropped_frame, lang = 'eng', config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
     cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
     cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
@@ -77,20 +77,18 @@ def main():
     horizontal, vertical = detect_lines(src)
     
     ## invert area
-    offset = 4
+    left_line_index = 17
+    right_line_index = 20
+    top_line_index = 0
+    bottom_line_index = -1
     
-    x1 = vertical[17][2] + offset
-    y1 = horizontal[0][3] + offset
-    x2 = vertical[20][2] - offset
-    y2 = horizontal[-1][3] -offset
-    
-    w = x2 - x1
-    h = y2 - y1
+    x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
+                         right_line_index, top_line_index, bottom_line_index)
     
     gray = get_grayscale(src)
     bw = get_binary(gray)
     cv.imshow("bw", bw)
-    bw = invert_area(bw, x1, y1, w, h, display=True)
+    bw = invert_area(bw, x, y, w, h, display=True)
     
     ## set keywords
     
@@ -113,23 +111,24 @@ def main():
     ## read text
     for i in range(first_line_index, last_line_index):
         for j, keyword in enumerate(keywords):
-        #for j in range(17, 19):
             counter += 1
-            x1 = vertical[j][2] + offset ## get the top-left x position
-            y1 = horizontal[i][3] + offset ## get the top-left y position
-            x2 = vertical[j+1][2] - offset ## get the bottom-right x position
-            y2 = horizontal[i+1][3] -offset ## get the bottom-right y position
             
-            w = x2 - x1 ## get the width
-            h = y2 - y1 ## get the height
+            left_line_index = j
+            right_line_index = j+1
+            top_line_index = i
+            bottom_line_index = i+1
+            
+            x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
+                         right_line_index, top_line_index, bottom_line_index)
             
             if (keywords[i]=='kabupaten'):
-                text = detect(bw, x1, y1, w, h, counter)
+                text = detect(bw, x, y, w, h, counter)
                 print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
             else:
-                text = detect_number(bw, x1, y1, w, h, counter)
+                text = detect_number(bw, x, y, w, h, counter)
                 print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
                 
+            ## add to dictionary
             dict_kabupaten[keyword].append(text)
     
     print(dict_kabupaten)
