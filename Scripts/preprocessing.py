@@ -107,34 +107,29 @@ def main(display = False, print_text = False, write = False):
                 text = detect(bw, x, y, w, h)
                 dict_kabupaten[keyword].append(text)
                 
-                if (display):
-                    image_with_text = draw_text(src, x, y, w, h, text)
-                    
-                if (display):
-                    cv.imshow("detect", image_with_text)
-                    #cv.imshow("ROI", cFrame)
-                    cv.waitKey(0)
-                    cv.destroyAllWindows()
-    
-                if (write):
-                    cv.imwrite("../Images/"+ str(counter) + ".png", image_with_text);
-
                 if (print_text):
                     print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
             else:
                 text = detect(bw, x, y, w, h, is_number=True)
                 dict_kabupaten[keyword].append(int(text))
                 
-                if (display):
-                    display_result(src, x, y, w, h, text, index = counter, write = write)
                 if (print_text):
                     print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
-                
-            ## add to dictionary
+            
+            if (display or write):
+                    image_with_text = draw_text(src, x, y, w, h, text)
+                    
+            if (display):
+                cv.imshow("detect", image_with_text)
+                cv.waitKey(0)
+                cv.destroyAllWindows()
+
+            if (write):
+                cv.imwrite("../Images/"+ str(counter) + ".png", image_with_text);
             
     
     print(dict_kabupaten)
     return 0
     
 if __name__ == "__main__":
-    main(display=True, write=True)
+    main(write=True)
