@@ -92,9 +92,14 @@ def main(display = False, print_text = False):
     last_line_index = 14
     
     ## read text
+    print("Start detecting text...")
     for i in range(first_line_index, last_line_index):
         for j, keyword in enumerate(keywords):
             counter += 1
+            
+            progress = counter/((last_line_index-first_line_index)*len(keywords)) * 100
+            percentage = "%.2f" % progress
+            print("Progress: " + percentage + "%")
             
             left_line_index = j
             right_line_index = j+1
@@ -103,8 +108,6 @@ def main(display = False, print_text = False):
             
             x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
                          right_line_index, top_line_index, bottom_line_index)
-            
-            print_text = True
             
             if (keywords[j]=='kabupaten'):
                 text = detect(bw, x, y, w, h)
