@@ -104,6 +104,17 @@ def detect_lines(image, rho = 1, theta = np.pi/180, threshold = 50, minLinLength
         
     return (horizontal_lines, vertical_lines)
     
+def get_ROI(horizontal, vertical, left_line_index, right_line_index, top_line_index, bottom_line_index, offset=4):
+    x1 = vertical[left_line_index][2] + offset
+    y1 = horizontal[top_line_index][3] + offset
+    x2 = vertical[right_line_index][2] - offset
+    y2 = horizontal[bottom_line_index][3] -offset
+    
+    w = x2 - x1
+    h = y2 - y1
+    
+    return x1, y1, w, h
+
 def main(argv):
     
     default_file = '../Images/source6.png'
