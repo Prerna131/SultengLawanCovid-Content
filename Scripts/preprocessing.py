@@ -29,39 +29,36 @@ def invert_area(image, x, y, w, h, display=False):
         cv.destroyAllWindows()
     return image
     
-def detect(bw, x, y, cell_w, cell_h, index = 0, is_number = False,
-           display=False, write_to_file=False):
+def detect(bw, x, y, cell_w, cell_h, is_number = False):
     cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
-    
-    cFrame = np.copy(bw)
 
     if (is_number):
         text = pytesseract.image_to_string(cropped_frame, lang = 'eng',
                                            config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
     else:
         text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
-    
-    if (display or write_to_file):
-        cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
-        cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
-                       2, (0, 0, 0), 5, cv.LINE_AA)
-        
-    if (display): 
-        cv.imshow("detect", cropped_frame)
-        #cv.imshow("ROI", cFrame)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
-    
-    if (write_to_file):
-        cv.imwrite("../Images/"+ str(index) + ".png", cFrame);
         
     return text
 
-def main():
+def display_result(src, x, y, w, h, text, index = 0, write = False):
+    cFrame = np.copy(src)
+    cv.rectangle(cFrame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
+               2, (0, 0, 0), 5, cv.LINE_AA)
+        
+    cv.imshow("detect", cFrame)
+    #cv.imshow("ROI", cFrame)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    
+    if (write):
+        cv.imwrite("../Images/"+ str(index) + ".png", cFrame);
+        
+def main(display = False, print_text = False):
     filename = '../Images/source7.png'
     
     src = cv.imread(cv.samples.findFile(filename))
-    horizontal, vertical = detect_lines(src)
+    horizontal, vertical = detect_lines(src, display=True)
     
     ## invert area
     left_line_index = 17
@@ -110,16 +107,24 @@ def main():
             print_text = True
             
             if (keywords[j]=='kabupaten'):
-                text = detect(bw, x, y, w, h, index=counter)
+                text = detect(bw, x, y, w, h)
+                dict_kabupaten[keyword].append(text)
+                
+                if (display):
+                    display_result(src, x, y, w, h, text, index = counter)
                 if (print_text):
                     print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
             else:
-                text = detect(bw, x, y, w, h, index=counter, is_number=True)
+                text = detect(bw, x, y, w, h, is_number=True)
+                dict_kabupaten[keyword].append(int(text))
+                
+                if (display):
+                    display_result(src, x, y, w, h, text, index = counter)
                 if (print_text):
                     print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
                 
             ## add to dictionary
-            dict_kabupaten[keyword].append(text)
+            
     
     print(dict_kabupaten)
     return 0
