@@ -35,9 +35,12 @@ def detect(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_file=Fal
     cFrame = np.copy(bw)
 
     text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
-    cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
-    cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
-                       2, (0, 0, 0), 5, cv.LINE_AA)     
+    
+    if (display or write_to_file):
+        cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
+        cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
+                       2, (0, 0, 0), 5, cv.LINE_AA)
+        
     if (display): 
         cv.imshow("detect", cropped_frame)
         #cv.imshow("ROI", cFrame)
@@ -55,8 +58,10 @@ def detect_number(bw, x, y, cell_w, cell_h, index = 0, display=False, write_to_f
     cFrame = np.copy(bw)
     
     text = pytesseract.image_to_string(cropped_frame, lang = 'eng', config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
-    cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
-    cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
+    
+    if (display or write_to_file):
+        cv.rectangle(cFrame, (x, y), (x+cell_w, y+cell_h), (255, 0, 0), 2)
+        cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
                        2, (0, 0, 0), 5, cv.LINE_AA) 
     
     if (display): 
