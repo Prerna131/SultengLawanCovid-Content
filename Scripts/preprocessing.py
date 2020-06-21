@@ -40,21 +40,15 @@ def detect(bw, x, y, cell_w, cell_h, is_number = False):
         
     return text
 
-def display_result(src, x, y, w, h, text, index = 0, write = False):
+def draw_text(src, x, y, w, h, text):
     cFrame = np.copy(src)
     cv.rectangle(cFrame, (x, y), (x+w, y+h), (255, 0, 0), 2)
     cv.putText(cFrame, "text: " + text, (50, 50), cv.FONT_HERSHEY_SIMPLEX,  
                2, (0, 0, 0), 5, cv.LINE_AA)
-        
-    cv.imshow("detect", cFrame)
-    #cv.imshow("ROI", cFrame)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
     
-    if (write):
-        cv.imwrite("../Images/"+ str(index) + ".png", cFrame);
+    return cFrame
         
-def main(display = False, print_text = False):
+def main(display = False, print_text = False, write = False):
     filename = '../Images/source7.png'
     
     src = cv.imread(cv.samples.findFile(filename))
@@ -114,7 +108,17 @@ def main(display = False, print_text = False):
                 dict_kabupaten[keyword].append(text)
                 
                 if (display):
-                    display_result(src, x, y, w, h, text, index = counter)
+                    image_with_text = draw_text(src, x, y, w, h, text)
+                    
+                if (display):
+                    cv.imshow("detect", image_with_text)
+                    #cv.imshow("ROI", cFrame)
+                    cv.waitKey(0)
+                    cv.destroyAllWindows()
+    
+                if (write):
+                    cv.imwrite("../Images/"+ str(counter) + ".png", image_with_text);
+
                 if (print_text):
                     print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
             else:
@@ -122,7 +126,7 @@ def main(display = False, print_text = False):
                 dict_kabupaten[keyword].append(int(text))
                 
                 if (display):
-                    display_result(src, x, y, w, h, text, index = counter)
+                    display_result(src, x, y, w, h, text, index = counter, write = write)
                 if (print_text):
                     print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
                 
@@ -133,4 +137,4 @@ def main(display = False, print_text = False):
     return 0
     
 if __name__ == "__main__":
-    main()
+    main(display=True, write=True)
