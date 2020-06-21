@@ -112,11 +112,11 @@ def main():
             if (keywords[j]=='kabupaten'):
                 text = detect(bw, x, y, w, h, index=counter)
                 if (print_text):
-                    print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + "text: ", text)
+                    print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
             else:
                 text = detect(bw, x, y, w, h, index=counter, is_number=True)
                 if (print_text):
-                    print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + "text: ", text)
+                    print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
                 
             ## add to dictionary
             dict_kabupaten[keyword].append(text)
