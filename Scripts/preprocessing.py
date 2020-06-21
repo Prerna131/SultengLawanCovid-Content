@@ -107,12 +107,16 @@ def main():
             x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
                          right_line_index, top_line_index, bottom_line_index)
             
+            print_text = True
+            
             if (keywords[j]=='kabupaten'):
                 text = detect(bw, x, y, w, h, index=counter)
-                print("Not number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
+                if (print_text):
+                    print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + "text: ", text)
             else:
                 text = detect(bw, x, y, w, h, index=counter, is_number=True)
-                print("Is number, " + "Keyword: " + keyword + ", row: ", str(i), "text: ", text)
+                if (print_text):
+                    print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + "text: ", text)
                 
             ## add to dictionary
             dict_kabupaten[keyword].append(text)
