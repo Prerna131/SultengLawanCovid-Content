@@ -50,7 +50,7 @@ def overlapping_filter(lines, sorting_index):
                 
     return filtered_lines
                
-def detect_lines(image, rho = 1, theta = np.pi/180, threshold = 50, minLinLength = 290, maxLineGap = 6, display = False):
+def detect_lines(image, title='default', rho = 1, theta = np.pi/180, threshold = 50, minLinLength = 290, maxLineGap = 6, display = False, write = False):
     # Check if image is loaded fine
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     
@@ -89,26 +89,29 @@ def detect_lines(image, rho = 1, theta = np.pi/180, threshold = 50, minLinLength
         for i, line in enumerate(horizontal_lines):
             cv.line(cImage, (line[0], line[1]), (line[2], line[3]), (0,255,0), 3, cv.LINE_AA)
             
-            cv.putText(cImage, str(i) + "h", (line[0] + 5, line[1]), cv.FONT_HERSHEY_SIMPLEX,  
-                       0.5, (0, 0, 0), 1, cv.LINE_AA) 
+            #cv.putText(cImage, str(i) + "h", (line[0] + 5, line[1]), cv.FONT_HERSHEY_SIMPLEX,  
+            #           0.5, (0, 0, 0), 1, cv.LINE_AA) 
             
         for i, line in enumerate(vertical_lines):
             cv.line(cImage, (line[0], line[1]), (line[2], line[3]), (0,0,255), 3, cv.LINE_AA)
-            cv.putText(cImage, str(i) + "v", (line[0], line[1] + 5), cv.FONT_HERSHEY_SIMPLEX,  
-                       0.5, (0, 0, 0), 1, cv.LINE_AA) 
+            #cv.putText(cImage, str(i) + "v", (line[0], line[1] + 5), cv.FONT_HERSHEY_SIMPLEX,  
+            #           0.5, (0, 0, 0), 1, cv.LINE_AA) 
             
         cv.imshow("Source", cImage)
         #cv.imshow("Canny", cdstP)
         cv.waitKey(0)
         cv.destroyAllWindows()
         
+    if (write):
+        cv.imwrite("../Images/" + title + ".png", cImage);
+        
     return (horizontal_lines, vertical_lines)
     
-def get_ROI(horizontal, vertical, left_line_index, right_line_index, top_line_index, bottom_line_index, offset=4):
+def get_ROI(horizontal, vertical, left_line_index, right_line_index, top_line_index, bottom_line_index, offset=3):
     x1 = vertical[left_line_index][2] + offset
     y1 = horizontal[top_line_index][3] + offset
     x2 = vertical[right_line_index][2] - offset
-    y2 = horizontal[bottom_line_index][3] -offset
+    y2 = horizontal[bottom_line_index][3] - offset
     
     w = x2 - x1
     h = y2 - y1
