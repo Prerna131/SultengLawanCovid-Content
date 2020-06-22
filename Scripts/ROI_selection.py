@@ -89,13 +89,13 @@ def detect_lines(image, title='default', rho = 1, theta = np.pi/180, threshold =
         for i, line in enumerate(horizontal_lines):
             cv.line(cImage, (line[0], line[1]), (line[2], line[3]), (0,255,0), 3, cv.LINE_AA)
             
-            #cv.putText(cImage, str(i) + "h", (line[0] + 5, line[1]), cv.FONT_HERSHEY_SIMPLEX,  
-            #           0.5, (0, 0, 0), 1, cv.LINE_AA) 
+            cv.putText(cImage, str(i) + "h", (line[0] + 5, line[1]), cv.FONT_HERSHEY_SIMPLEX,  
+                       0.5, (0, 0, 0), 1, cv.LINE_AA) 
             
         for i, line in enumerate(vertical_lines):
             cv.line(cImage, (line[0], line[1]), (line[2], line[3]), (0,0,255), 3, cv.LINE_AA)
-            #cv.putText(cImage, str(i) + "v", (line[0], line[1] + 5), cv.FONT_HERSHEY_SIMPLEX,  
-            #           0.5, (0, 0, 0), 1, cv.LINE_AA) 
+            cv.putText(cImage, str(i) + "v", (line[0], line[1] + 5), cv.FONT_HERSHEY_SIMPLEX,  
+                       0.5, (0, 0, 0), 1, cv.LINE_AA) 
             
         cv.imshow("Source", cImage)
         #cv.imshow("Canny", cdstP)
