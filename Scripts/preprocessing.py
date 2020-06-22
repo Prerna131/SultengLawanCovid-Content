@@ -52,7 +52,8 @@ def main(display = False, print_text = False, write = False):
     filename = '../Images/source7.png'
     
     src = cv.imread(cv.samples.findFile(filename))
-    horizontal, vertical = detect_lines(src, display=True)
+    
+    horizontal, vertical = detect_lines(src, minLinLength=350, display=True)
     
     ## invert area
     left_line_index = 17
@@ -111,7 +112,7 @@ def main(display = False, print_text = False, write = False):
                     print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
             else:
                 text = detect(bw, x, y, w, h, is_number=True)
-                dict_kabupaten[keyword].append(int(text))
+                dict_kabupaten[keyword].append(text)
                 
                 if (print_text):
                     print("Is number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
