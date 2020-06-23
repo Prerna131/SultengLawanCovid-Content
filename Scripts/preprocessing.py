@@ -2,9 +2,7 @@ import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
 import cv2 as cv
-
 from ROI_selection import detect_lines, get_ROI
-
 import numpy as np
 
 def get_grayscale(image):
@@ -23,6 +21,7 @@ def invert_area(image, x, y, w, h, display=False):
     ones = 1
     
     image[ y:y+h , x:x+w ] = ones*255 - image[ y:y+h , x:x+w ] 
+    
     if (display): 
         cv.imshow("inverted", image)
         cv.waitKey(0)
@@ -33,10 +32,10 @@ def detect(bw, x, y, cell_w, cell_h, is_number = False):
     cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
 
     if (is_number):
-        text = pytesseract.image_to_string(cropped_frame, lang = 'eng',
-                                           config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 1')
+        text = pytesseract.image_to_string(cropped_frame,
+                                           config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 2')
     else:
-        text = pytesseract.image_to_string(cropped_frame, lang='eng', config='--psm 10')        
+        text = pytesseract.image_to_string(cropped_frame, config='--psm 10')        
         
     return text
 
@@ -48,16 +47,21 @@ def draw_text(src, x, y, w, h, text):
     
     return cFrame
         
+def erode(img, kernel_size = 5):
+    kernel = np.ones((kernel_size,kernel_size), np.uint8) 
+    img_erosion = cv.dilate(img, kernel, iterations=2)
+    return img_erosion
+    
 def main(display = False, print_text = False, write = False):
-    filename = '../Images/source7.png'
+    filename = '../Images/source10.png'
     
     src = cv.imread(cv.samples.findFile(filename))
     
     horizontal, vertical = detect_lines(src, minLinLength=350, display=True)
     
     ## invert area
-    left_line_index = 17
-    right_line_index = 20
+    left_line_index = 19
+    right_line_index = 22
     top_line_index = 0
     bottom_line_index = -1
     
@@ -68,11 +72,14 @@ def main(display = False, print_text = False, write = False):
     bw = get_binary(gray)
     cv.imshow("bw", bw)
     bw = invert_area(bw, x, y, w, h, display=True)
+    #bw = erode(bw, kernel_size=2)
+    cv.imshow("eroded", bw)
+    cv.waitKey(0)
     
     ## set keywords
     keywords = ['no', 'kabupaten', 'kb_otg', 'kl_otg', 'sm_otg', 'ks_otg', 'not_cvd_otg',
-            'kb_odp', 'kl_odp', 'sm_odp', 'ks_odp', 'not_cvd_odp',
-            'kb_pdp', 'kl_pdp', 'sm_pdp', 'ks_pdp', 'not_cvd_pdp',
+            'kb_odp', 'kl_odp', 'sm_odp', 'ks_odp', 'not_cvd_odp', 'death_odp',
+            'kb_pdp', 'kl_pdp', 'sm_pdp', 'ks_pdp', 'not_cvd_pdp', 'death_pdp',
             'positif', 'sembuh', 'meninggal']
     
     dict_kabupaten = {}
@@ -133,4 +140,4 @@ def main(display = False, print_text = False, write = False):
     return 0
     
 if __name__ == "__main__":
-    main(write=True)
+    main()
