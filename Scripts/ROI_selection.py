@@ -61,8 +61,6 @@ def detect_lines(image, title='default', rho = 1, theta = np.pi/180, threshold =
     dst = cv.Canny(gray, 50, 150, None, 3)
     
     # Copy edges to the images that will display the results in BGR
-    cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
-    cdstP = np.copy(cdst)
     cImage = np.copy(image)
     
     #linesP = cv.HoughLinesP(dst, 1 , np.pi / 180, 50, None, 290, 6)
@@ -106,8 +104,12 @@ def detect_lines(image, title='default', rho = 1, theta = np.pi/180, threshold =
         cv.imwrite("../Images/" + title + ".png", cImage);
         
     return (horizontal_lines, vertical_lines)
+
+def get_cropped_image(image, x, y, w, h):
+    cropped_image = image[ y:y+h , x:x+w ]
+    return cropped_image
     
-def get_ROI(horizontal, vertical, left_line_index, right_line_index, top_line_index, bottom_line_index, offset=3):
+def get_ROI(image, horizontal, vertical, left_line_index, right_line_index, top_line_index, bottom_line_index, offset=4):
     x1 = vertical[left_line_index][2] + offset
     y1 = horizontal[top_line_index][3] + offset
     x2 = vertical[right_line_index][2] - offset
@@ -116,7 +118,9 @@ def get_ROI(horizontal, vertical, left_line_index, right_line_index, top_line_in
     w = x2 - x1
     h = y2 - y1
     
-    return x1, y1, w, h
+    cropped_image = get_cropped_image(image, x1, y1, w, h)
+    
+    return cropped_image, (x1, y1, w, h)
 
 def main(argv):
     
