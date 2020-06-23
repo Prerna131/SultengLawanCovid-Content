@@ -12,10 +12,6 @@ def get_binary(image):
     (thresh, blackAndWhiteImage) = cv.threshold(image, 100, 255, cv.THRESH_BINARY)
     return blackAndWhiteImage
 
-def get_cropped_image(image, x, y, w, h):
-    cropped_image = image[ y:y+h , x:x+w ]
-    return cropped_image
-
 def invert_area(image, x, y, w, h, display=False):
     ones = np.copy(image)
     ones = 1
@@ -28,9 +24,7 @@ def invert_area(image, x, y, w, h, display=False):
         cv.destroyAllWindows()
     return image
     
-def detect(bw, x, y, cell_w, cell_h, is_number = False):
-    cropped_frame = get_cropped_image(bw, x, y, cell_w, cell_h)
-
+def detect(cropped_frame, is_number = False):
     if (is_number):
         text = pytesseract.image_to_string(cropped_frame,
                                            config ='-c tessedit_char_whitelist=0123456789 --psm 10 --oem 2')
@@ -65,7 +59,7 @@ def main(display = False, print_text = False, write = False):
     top_line_index = 0
     bottom_line_index = -1
     
-    x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
+    cropped_image, (x, y, w, h) = get_ROI(src, horizontal, vertical, left_line_index,
                          right_line_index, top_line_index, bottom_line_index)
     
     gray = get_grayscale(src)
@@ -108,17 +102,17 @@ def main(display = False, print_text = False, write = False):
             top_line_index = i
             bottom_line_index = i+1
             
-            x, y, w, h = get_ROI(horizontal, vertical, left_line_index,
+            cropped_image, (x,y,w,h) = get_ROI(bw, horizontal, vertical, left_line_index,
                          right_line_index, top_line_index, bottom_line_index)
             
             if (keywords[j]=='kabupaten'):
-                text = detect(bw, x, y, w, h)
+                text = detect(cropped_image)
                 dict_kabupaten[keyword].append(text)
                 
                 if (print_text):
                     print("Not number" + ", Row: ", str(i), ", Keyword: " + keyword + ", Text: ", text)
             else:
-                text = detect(bw, x, y, w, h, is_number=True)
+                text = detect(cropped_image, is_number=True)
                 dict_kabupaten[keyword].append(text)
                 
                 if (print_text):
@@ -140,4 +134,4 @@ def main(display = False, print_text = False, write = False):
     return 0
     
 if __name__ == "__main__":
-    main()
+    main(display=True)
